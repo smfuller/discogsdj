@@ -5,6 +5,6 @@
 build
 
 # Ignore IDEA configs
-.idea
+.idea/
 
 

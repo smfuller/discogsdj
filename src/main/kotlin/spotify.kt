@@ -18,7 +18,11 @@ val spotifyClient: HttpClient = HttpClient.newHttpClient()
 fun main() {
     val spotifyURI = "https://api.spotify.com/v1/users/$SPOTIFY_USERNAME/playlists"
 
-    println(createPlaylist(spotifyClient, spotifyURI))
+    when (createPlaylist(spotifyClient, spotifyURI)) {
+        201 -> println("Success -- check your playlists!")
+        401 -> println("Not authorized, re-up your bearer token")
+        else -> println("Something has gone very, very wrong")
+    }
 }
 
 fun getSpotifyJson(client: HttpClient, uri: String): JsonObject {
@@ -34,7 +38,7 @@ fun getSpotifyJson(client: HttpClient, uri: String): JsonObject {
     return Parser.default().parse(responseStream) as JsonObject
 }
 
-fun createPlaylist(client: HttpClient, uri: String): String {
+fun createPlaylist(client: HttpClient, uri: String): Int {
     val now = LocalDateTime.now().format(DateTimeFormatter
         .ofPattern("yyyy-MM-dd hh:mm:ss a"))
 
@@ -54,5 +58,5 @@ fun createPlaylist(client: HttpClient, uri: String): String {
         .build()
 
     val response = client.send(request, HttpResponse.BodyHandlers.ofString())
-    return response.body()
+    return response.statusCode()
 }

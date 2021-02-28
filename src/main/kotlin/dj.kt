@@ -18,12 +18,10 @@ fun main() {
     val username = readLine()
     val collectionURI = "https://api.discogs.com/users/${username}/collection?per_page=10"
 
-    val fullJson = arrayListOf<JsonObject>()
-
     val collectionJson = getJson(client, collectionURI)
 
     // pagination testing
-    val collectionList = getNextPageJson(collectionJson, fullJson)
+    val collectionList = getNextPageJson(collectionJson, arrayListOf())
 
     val albums = mutableMapOf<String, String>()
     val albumList: MutableList<Album> = mutableListOf()

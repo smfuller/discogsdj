@@ -29,10 +29,10 @@ fun main() {
     )
 
     // pagination testing
-    getNextPageJson(wantsJson, fullJson)
+    getNextPageJson(collectionJson, fullJson)
     for(i in fullJson) {
-        i.lookup<Int>(
-            "wants.id"
+        i.lookup<String>(
+            "releases.basic_information.title"
         ).let { for(j in it) println(j) }
     }
 }

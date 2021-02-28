@@ -16,25 +16,45 @@ fun main() {
 
     print("Verify your username to get your collection >> ")
     val username = readLine()
-    val wantsURI = "https://api.discogs.com/users/${username}/wants?per_page=30"
-    val collectionURI = "https://api.discogs.com/users/${username}/collection"
+    val collectionURI = "https://api.discogs.com/users/${username}/collection?per_page=10"
 
     val fullJson = arrayListOf<JsonObject>()
 
-    val wantsJson = getJson(client, wantsURI)
     val collectionJson = getJson(client, collectionURI)
 
-    val tracklist = collectionJson.lookup<String>(
-        "releases.basic_information.tracklist.title"
-    )
-
     // pagination testing
-    getNextPageJson(collectionJson, fullJson)
-    for(i in fullJson) {
+    val collectionList = getNextPageJson(collectionJson, fullJson)
+
+    val albums = mutableMapOf<String, String>()
+    val albumList: MutableList<Album> = mutableListOf()
+
+    for(i in collectionList) {
         i.lookup<String>(
-            "releases.basic_information.title"
-        ).let { for(j in it) println(j) }
+            "releases.basic_information"
+        ).let {
+            albums.putAll(it.lookup<String>("artists.name").zip(
+                it.lookup<String>("title")
+            ))
+        }
     }
+
+    for ((artist, album) in albums) {
+        albumList.add(Album(artist, album))
+    }
+
+    for(i in albumList) {
+        println("${i.artist} -- ${i.title}")
+    }
+
+
+//    for(i in collectionList) {
+//        i.lookup<String>(
+//            "releases.basic_information"
+//        ).let {
+//
+//            val artist = it.lookup<String>("artists.name")
+//            val album = it.lookup<String>("title")
+//            println("$artist -- $album")
 }
 
 fun getJson(client: HttpClient, uri: String): JsonObject {

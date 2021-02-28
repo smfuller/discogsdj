@@ -8,7 +8,7 @@ import java.net.http.HttpResponse
 
 val SPOTIFY_CLIENT_ID: String = System.getenv("SPOTIFY_CLIENT_ID")
 val SPOTIFY_CLIENT_SECRET: String = System.getenv("SPOTIFY_CLIENT_SECRET")
-val SPOTIFY_MY_BEARER_TOKEN = System.getenv("SPOTIFY_MY_BEARER_TOKEN")
+val SPOTIFY_MY_BEARER_TOKEN: String = System.getenv("SPOTIFY_MY_BEARER_TOKEN")
 val SPOTIFY_REFRESH_TOKEN: String = System.getenv("SPOTIFY_REFRESH_TOKEN")
 val spotifyClient: HttpClient = HttpClient.newHttpClient()
 

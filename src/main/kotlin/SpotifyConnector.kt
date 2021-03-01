@@ -16,6 +16,7 @@ class SpotifyConnector (client: HttpClient, albums: MutableList<Album>){
 
     val playlistURI = "https://api.spotify.com/v1/users/$SPOTIFY_USERNAME/playlists"
     val searchURI = "https://api.spotify.com/v1/search"
+    val playlistUpdateURI = "https://api.spotify.com/v1/playlists"
 
     fun getSearchJson(client: HttpClient, uri: String, artist: String, album: String): JsonObject {
         val request = HttpRequest
@@ -32,7 +33,7 @@ class SpotifyConnector (client: HttpClient, albums: MutableList<Album>){
         return Parser.default().parse(responseStream) as JsonObject
     }
 
-    fun createPlaylist(): Int {
+    fun createPlaylist(): JsonResponse {
         val now = LocalDateTime.now().format(
             DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss a")
         )
@@ -55,21 +56,53 @@ class SpotifyConnector (client: HttpClient, albums: MutableList<Album>){
             .build()
 
         val response = client.send(request, HttpResponse.BodyHandlers.ofString())
-        return response.statusCode()
+        return JsonResponse(
+            response.statusCode(),
+            Parser.default().parse(response.body().byteInputStream()) as JsonObject
+        )
     }
-//
-//    fun addToPlaylist(albumURI: String): Int {
-//        val request = HttpRequest
-//            .newBuilder(URI.create(playlistURI))
-//            .header("accept", "application.json")
-//            .header(
-//                "Authorization",
-//                "Bearer $SPOTIFY_MY_BEARER_TOKEN"
-//            )
-//            .POST(HttpRequest.BodyPublishers.ofString())
-//            .build()
-//
-//        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
-//        return response.statusCode()
-//    }
+
+    fun addToPlaylist(uris: MutableList<String>, playlist: String?): JsonResponse {
+        val bodyJson = """
+            {
+              "uris": $uris
+            }
+        """.trimIndent()
+
+
+        println(bodyJson)
+        val request = HttpRequest
+            .newBuilder(URI.create("$playlistUpdateURI/$playlist/tracks"))
+            .header("accept", "application.json")
+            .header(
+                "Authorization",
+                "Bearer $SPOTIFY_MY_BEARER_TOKEN"
+            )
+            .POST(HttpRequest.BodyPublishers.ofString(bodyJson))
+            .build()
+
+        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
+
+        println(response)
+        return JsonResponse(
+            response.statusCode(),
+            Parser.default().parse(response.body().byteInputStream()) as JsonObject
+        )
+    }
+
+    fun getTracks(uri: String): JsonArray<String> {
+        val request = HttpRequest
+            .newBuilder(URI.create("https://api.spotify.com/v1/albums/${uri
+                .replace("spotify:album:", "")}/tracks"))
+            .header("accept", "application.json")
+            .header(
+                "Authorization",
+                "Bearer $SPOTIFY_MY_BEARER_TOKEN"
+            )
+            .build()
+        val response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        val responseStream: InputStream = response.body().byteInputStream()
+
+        return (Parser.default().parse(responseStream) as JsonObject).lookup<String>("items.uri")
+    }
 }

@@ -41,17 +41,45 @@ fun main() {
         albumList.add(Album(artists[i], records[i]))
 
     val s = SpotifyConnector(client, albumList)
-    when(s.createPlaylist()) {
+    val playlistResponse = s.createPlaylist()
+    val playlistId = playlistResponse.json.string("id")
+    println(playlistId)
+
+    when(playlistResponse.statusCode) {
         201 -> {
-            println("Playlist created! Looking for albums to add to it...")
+            val albumURIs = mutableListOf<String>()
+            var trackURIs = mutableListOf<String>()
+
+            println(playlistResponse.json.toJsonString(true))
+            println("\nPlaylist $playlistId created! Looking for songs to add to it...")
             for (album in albumList) {
                 s.getSearchJson(client, s.searchURI, album.artist, album.title)
                     .lookup<String>("albums.items.uri")
                     .value.let {
                         if (it.size > 0) {
+                            albumURIs.add(it[0])
                         }
                 }
             }
+
+            for (uri in albumURIs) {
+                for (track in s.getTracks(uri)) {
+                    trackURIs.add("\"$track\"")
+                }
+            }
+
+            println("${trackURIs.size} songs found. Adding...")
+
+            while(trackURIs.size > 100) {
+                s.addToPlaylist(trackURIs.subList(0, 99), playlistId)
+                trackURIs = trackURIs.subList(100, trackURIs.size-1)
+                println("${trackURIs.size} left...")
+            }
+
+            s.addToPlaylist(trackURIs, playlistId)
+
+            //println(s.addToPlaylist(trackURIs, playlistId).json.toJsonString(true))
+
         }
         401 -> println("Your bearer token has expired...")
         else -> println("If you're seeing this message, something has gone very wrong")

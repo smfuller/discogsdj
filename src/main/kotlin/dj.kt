@@ -14,7 +14,7 @@ val client: HttpClient = HttpClient.newHttpClient()
 
 fun main() {
 
-    print("Verify your username to get your collection >> ")
+    print("To begin, enter your Discogs username >> ")
     val username = readLine()
     val collectionURI = "https://api.discogs.com/users/${username}/collection?per_page=20"
 
@@ -35,12 +35,13 @@ fun main() {
         }
     }
 
+    // TODO: some albums are missing due to titles not matching between Spotify and Discogs
     artists.replaceAll {e -> e.replace(Regex(" \\([0-9]\\)"), "")}
 
     for (i in 0 until records.size)
         albumList.add(Album(artists[i], records[i]))
 
-    val s = SpotifyConnector(client, albumList)
+    val s = SpotifyConnector()
     val playlistResponse = s.createPlaylist()
     val playlistId = playlistResponse.json.string("id")
     println(playlistId)
@@ -70,6 +71,7 @@ fun main() {
 
             println("${trackURIs.size} songs found. Adding...")
 
+            // TODO -- remove duplicates
             while(trackURIs.size > 100) {
                 s.addToPlaylist(trackURIs.subList(0, 99), playlistId)
                 trackURIs = trackURIs.subList(100, trackURIs.size-1)
@@ -78,14 +80,12 @@ fun main() {
 
             s.addToPlaylist(trackURIs, playlistId)
 
-            //println(s.addToPlaylist(trackURIs, playlistId).json.toJsonString(true))
-
         }
+        // TODO -- refresh bearer token within program
         401 -> println("Your bearer token has expired...")
         else -> println("If you're seeing this message, something has gone very wrong")
     }
 }
-
 
 fun getJson(client: HttpClient, uri: String): JsonObject {
     val request = HttpRequest
@@ -97,12 +97,11 @@ fun getJson(client: HttpClient, uri: String): JsonObject {
                     "oauth_signature_method=\"HMAC-SHA1\"," +
                     "oauth_version=\"1.0\"")
         .build()
-    val response = client.send(request, HttpResponse.BodyHandlers.ofString());
+    val response = client.send(request, HttpResponse.BodyHandlers.ofString())
     val responseStream: InputStream = response.body().byteInputStream()
 
     return Parser.default().parse(responseStream) as JsonObject
 }
-
 
 fun getNextPageJson(json: JsonObject, list: ArrayList<JsonObject>): ArrayList<JsonObject> {
     println("Adding a json object...")

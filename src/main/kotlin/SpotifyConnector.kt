@@ -7,17 +7,21 @@ import java.net.http.HttpResponse
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-class SpotifyConnector (client: HttpClient, albums: MutableList<Album>){
-    val SPOTIFY_CLIENT_ID: String = System.getenv("SPOTIFY_CLIENT_ID")
-    val SPOTIFY_CLIENT_SECRET: String = System.getenv("SPOTIFY_CLIENT_SECRET")
-    val SPOTIFY_MY_BEARER_TOKEN: String = System.getenv("SPOTIFY_MY_BEARER_TOKEN")
-    val SPOTIFY_REFRESH_TOKEN: String = System.getenv("SPOTIFY_REFRESH_TOKEN")
-    val SPOTIFY_USERNAME: String = System.getenv("SPOTIFY_USERNAME")
+class SpotifyConnector {
+    private val SPOTIFY_CLIENT_ID: String = System.getenv("SPOTIFY_CLIENT_ID")              //TODO?
+    private val SPOTIFY_CLIENT_SECRET: String = System.getenv("SPOTIFY_CLIENT_SECRET")      //TODO?
+    private val SPOTIFY_MY_BEARER_TOKEN: String = System.getenv("SPOTIFY_MY_BEARER_TOKEN")
+    private val SPOTIFY_REFRESH_TOKEN: String = System.getenv("SPOTIFY_REFRESH_TOKEN")      //TODO?
+    private val SPOTIFY_USERNAME: String = System.getenv("SPOTIFY_USERNAME")
 
+
+    // TODO: refactor URI handling
     val playlistURI = "https://api.spotify.com/v1/users/$SPOTIFY_USERNAME/playlists"
     val searchURI = "https://api.spotify.com/v1/search"
     val playlistUpdateURI = "https://api.spotify.com/v1/playlists"
 
+
+    // TODO: clean up all JSON methods (lots of duplicate code)
     fun getSearchJson(client: HttpClient, uri: String, artist: String, album: String): JsonObject {
         val request = HttpRequest
             .newBuilder(URI.create("$uri?q=${("$artist+$album").replace(" ", "+")}&type=album"))
@@ -27,7 +31,7 @@ class SpotifyConnector (client: HttpClient, albums: MutableList<Album>){
                 "Bearer $SPOTIFY_MY_BEARER_TOKEN"
             )
             .build()
-        val response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
         val responseStream: InputStream = response.body().byteInputStream()
 
         return Parser.default().parse(responseStream) as JsonObject
@@ -100,9 +104,9 @@ class SpotifyConnector (client: HttpClient, albums: MutableList<Album>){
                 "Bearer $SPOTIFY_MY_BEARER_TOKEN"
             )
             .build()
-        val response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
         val responseStream: InputStream = response.body().byteInputStream()
 
-        return (Parser.default().parse(responseStream) as JsonObject).lookup<String>("items.uri")
+        return (Parser.default().parse(responseStream) as JsonObject).lookup("items.uri")
     }
 }

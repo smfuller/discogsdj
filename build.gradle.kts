@@ -15,5 +15,5 @@ repositories {
 dependencies {
     implementation("com.beust:klaxon:5.0.1")
     implementation("junit:junit:4.12")
-    implementation("org.junit.jupiter:junit-jupiter:5.4.2");
+    implementation("org.junit.jupiter:junit-jupiter:5.4.2")
 }

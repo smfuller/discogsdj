@@ -18,33 +18,20 @@ fun main() {
     val username = readLine()
     val collectionURI = "https://api.discogs.com/users/${username}/collection?per_page=20"
 
-    val collectionJson = getJson(client, collectionURI)
-
-    // pagination testing
-    val collectionList = getNextPageJson(collectionJson, arrayListOf())
+    val collectionList = getNextPageJson(getJson(client, collectionURI), arrayListOf())
 
     val artists: MutableList<String> = mutableListOf()
     val records: MutableList<String> = mutableListOf()
-
     val albumList: MutableList<Album> = mutableListOf()
-
-
 
     for(i in collectionList) {
         i.lookup<String>(
             "releases.basic_information"
         ).let {
-            artists.addAll(it.string("artists_sort") as Collection<String>)
-            records.addAll(it.string("title") as Collection<String>)
 
-//            for (artist in it.string("artists_sort").value)
-//                println(artist?.replace(Regex(" \\([0-9]\\)"), ""))
-
-//            artists.addAll(it.lookup<String>("artists.name"))
-//            records.addAll(it.lookup("title"))
-//            albums.putAll(it.lookup<String>("artists.name").zip(
-//                it.lookup("title")
-//            ))
+            // TODO: find a way to clean up these unchecked casts!
+            artists.addAll(it.string("artists_sort") as MutableList<String>)
+            records.addAll(it.string("title") as MutableList<String>)
         }
     }
 
@@ -53,30 +40,24 @@ fun main() {
     for (i in 0 until records.size)
         albumList.add(Album(artists[i], records[i]))
 
-    for (album in albumList)
-        println("${album.artist} -- ${album.title}")
-
     val s = SpotifyConnector(client, albumList)
-
-//    for (i in 0 until records.size) {
-//        println("${artists[i]} - ${records[i]}")
-//    }
-
-
-//
-//    for ((artist, album) in albums) {
-//        albumList.add(Album(artist, album))
-//    }
-
-//    for(i in collectionList) {
-//        i.lookup<String>(
-//            "releases.basic_information"
-//        ).let {
-//
-//            val artist = it.lookup<String>("artists.name")
-//            val album = it.lookup<String>("title")
-//            println("$artist -- $album")
+    when(s.createPlaylist()) {
+        201 -> {
+            println("Playlist created! Looking for albums to add to it...")
+            for (album in albumList) {
+                s.getSearchJson(client, s.searchURI, album.artist, album.title)
+                    .lookup<String>("albums.items.uri")
+                    .value.let {
+                        if (it.size > 0) {
+                        }
+                }
+            }
+        }
+        401 -> println("Your bearer token has expired...")
+        else -> println("If you're seeing this message, something has gone very wrong")
+    }
 }
+
 
 fun getJson(client: HttpClient, uri: String): JsonObject {
     val request = HttpRequest
@@ -93,6 +74,7 @@ fun getJson(client: HttpClient, uri: String): JsonObject {
 
     return Parser.default().parse(responseStream) as JsonObject
 }
+
 
 fun getNextPageJson(json: JsonObject, list: ArrayList<JsonObject>): ArrayList<JsonObject> {
     println("Adding a json object...")

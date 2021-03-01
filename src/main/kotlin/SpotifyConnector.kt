@@ -34,8 +34,7 @@ class SpotifyConnector (client: HttpClient, albums: MutableList<Album>){
 
     fun createPlaylist(): Int {
         val now = LocalDateTime.now().format(
-            DateTimeFormatter
-                .ofPattern("yyyy-MM-dd hh:mm:ss a")
+            DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss a")
         )
 
         val playlistJson = """
@@ -44,7 +43,7 @@ class SpotifyConnector (client: HttpClient, albums: MutableList<Album>){
             "description": "This is a playlist",
             "public": false
         }
-    """.trimIndent()
+        """.trimIndent()
         val request = HttpRequest
             .newBuilder(URI.create(playlistURI))
             .header("accept", "application.json")
@@ -58,4 +57,19 @@ class SpotifyConnector (client: HttpClient, albums: MutableList<Album>){
         val response = client.send(request, HttpResponse.BodyHandlers.ofString())
         return response.statusCode()
     }
+//
+//    fun addToPlaylist(albumURI: String): Int {
+//        val request = HttpRequest
+//            .newBuilder(URI.create(playlistURI))
+//            .header("accept", "application.json")
+//            .header(
+//                "Authorization",
+//                "Bearer $SPOTIFY_MY_BEARER_TOKEN"
+//            )
+//            .POST(HttpRequest.BodyPublishers.ofString())
+//            .build()
+//
+//        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
+//        return response.statusCode()
+//    }
 }

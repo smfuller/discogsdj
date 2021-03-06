@@ -16,6 +16,8 @@ fun main() {
 
     print("To begin, enter your Discogs username >> ")
     val username = readLine()
+
+    val startTime = System.nanoTime()
     val collectionURI = "https://api.discogs.com/users/${username}/collection?per_page=20"
 
     val collectionList = getNextPageJson(getJson(client, collectionURI), arrayListOf())
@@ -85,6 +87,9 @@ fun main() {
         401 -> println("Your bearer token has expired...")
         else -> println("If you're seeing this message, something has gone very wrong")
     }
+
+    val endTime = System.nanoTime()
+    println("Done in ${(endTime - startTime) / 1000000000} seconds")
 }
 
 fun getJson(client: HttpClient, uri: String): JsonObject {

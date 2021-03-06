@@ -10,15 +10,14 @@ val DISCOGS_CONSUMER_KEY: String = System.getenv("DISCOGS_CONSUMER_KEY")
 val DISCOGS_CONSUMER_SECRET: String = System.getenv("DISCOGS_CONSUMER_SECRET")
 val DISCOGS_MY_ACCESS_TOKEN: String = System.getenv("DISCOGS_MY_ACCESS_TOKEN")
 val DISCOGS_MY_ACCESS_SECRET: String = System.getenv("DISCOGS_MY_ACCESS_SECRET")
+val DISCOGS_USERNAME: String = System.getenv("DISCOGS_USERNAME")
+
 val client: HttpClient = HttpClient.newHttpClient()
 
 fun main() {
 
-    print("To begin, enter your Discogs username >> ")
-    val username = readLine()
-
     val startTime = System.nanoTime()
-    val collectionURI = "https://api.discogs.com/users/${username}/collection?per_page=20"
+    val collectionURI = "https://api.discogs.com/users/${DISCOGS_USERNAME}/collection?per_page=20"
 
     val collectionList = getNextPageJson(getJson(client, collectionURI), arrayListOf())
 

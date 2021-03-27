@@ -45,7 +45,6 @@ fun main() {
     val s = SpotifyConnector()
     val playlistResponse = s.createPlaylist()
     val playlistId = playlistResponse.json.string("id")
-    println(playlistId)
 
     when(playlistResponse.statusCode) {
         201 -> {

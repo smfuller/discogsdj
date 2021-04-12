@@ -53,7 +53,6 @@ fun main() {
             val albumURIs = mutableListOf<String>()
             var trackURIs = mutableListOf<String>()
 
-            println(playlistResponse.json.toJsonString(true))
             println("\nPlaylist $playlistId created! Looking for songs to add to it...")
             for (album in albumSet) {
                 s.getSearchJson(client, s.searchURI, album.artist, album.title)

@@ -23,7 +23,7 @@ fun main() {
 
     val artists: MutableList<String> = mutableListOf()
     val records: MutableList<String> = mutableListOf()
-    val albumList: MutableList<Album> = mutableListOf()
+    val albumSet: MutableSet<Album> = mutableSetOf()
 
     for(i in collectionList) {
         i.lookup<String>(
@@ -42,7 +42,7 @@ fun main() {
     artists.replaceAll {e -> e.replace(Regex(" \\([0-9]\\)"), "")}
 
     for (i in 0 until records.size)
-        albumList.add(Album(artists[i], records[i]))
+        albumSet.add(Album(artists[i], records[i]))
 
     val s = SpotifyConnector()
     val playlistResponse = s.createPlaylist()
@@ -55,7 +55,7 @@ fun main() {
 
             println(playlistResponse.json.toJsonString(true))
             println("\nPlaylist $playlistId created! Looking for songs to add to it...")
-            for (album in albumList) {
+            for (album in albumSet) {
                 s.getSearchJson(client, s.searchURI, album.artist, album.title)
                     .lookup<String>("albums.items.uri")
                     .value.let {
@@ -73,7 +73,6 @@ fun main() {
 
             println("${trackURIs.size} songs found. Adding...")
 
-            // TODO -- remove duplicates
             while(trackURIs.size > 100) {
                 s.addToPlaylist(trackURIs.subList(0, 99), playlistId)
                 trackURIs = trackURIs.subList(100, trackURIs.size-1)

@@ -73,8 +73,6 @@ class SpotifyConnector {
             }
         """.trimIndent()
 
-
-        println(bodyJson)
         val request = HttpRequest
             .newBuilder(URI.create("$playlistUpdateURI/$playlist/tracks"))
             .header("accept", "application.json")
@@ -87,7 +85,6 @@ class SpotifyConnector {
 
         val response = client.send(request, HttpResponse.BodyHandlers.ofString())
 
-        println(response)
         return JsonResponse(
             response.statusCode(),
             Parser.default().parse(response.body().byteInputStream()) as JsonObject

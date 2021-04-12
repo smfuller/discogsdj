@@ -30,9 +30,11 @@ fun main() {
             "releases.basic_information"
         ).let {
 
-            // TODO: find a way to clean up these unchecked casts!
-            artists.addAll(it.string("artists_sort") as MutableList<String>)
-            records.addAll(it.string("title") as MutableList<String>)
+            @Suppress("UNCHECKED_CAST")
+            artists += it.string("artists_sort") as MutableList<String>
+
+            @Suppress("UNCHECKED_CAST")
+            records += it.string("title") as MutableList<String>
         }
     }
 

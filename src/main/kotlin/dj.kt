@@ -1,16 +1,5 @@
 import com.beust.klaxon.*
-import java.io.InputStream
-import java.net.URI
 import java.net.http.HttpClient
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
-
-
-val DISCOGS_CONSUMER_KEY: String = System.getenv("DISCOGS_CONSUMER_KEY")
-val DISCOGS_CONSUMER_SECRET: String = System.getenv("DISCOGS_CONSUMER_SECRET")
-val DISCOGS_MY_ACCESS_TOKEN: String = System.getenv("DISCOGS_MY_ACCESS_TOKEN")
-val DISCOGS_MY_ACCESS_SECRET: String = System.getenv("DISCOGS_MY_ACCESS_SECRET")
-val DISCOGS_USERNAME: String = System.getenv("DISCOGS_USERNAME")
 
 val client: HttpClient = HttpClient.newHttpClient()
 

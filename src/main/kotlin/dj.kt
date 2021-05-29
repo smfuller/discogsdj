@@ -18,8 +18,10 @@ fun main() {
 
     val startTime = System.nanoTime()
     val collectionURI = "https://api.discogs.com/users/${DISCOGS_USERNAME}/collection?per_page=20"
+    val discogs = DiscogsConnector()
 
-    val collectionList = getNextPageJson(getJson(client, collectionURI), arrayListOf())
+    val discogsJson = discogs.getJson(client, collectionURI)
+    val collectionList = discogs.getNextPageJson(discogsJson, arrayListOf())
 
     val artists: MutableList<String> = mutableListOf()
     val records: MutableList<String> = mutableListOf()
@@ -90,34 +92,5 @@ fun main() {
     println("Done in ${(endTime - startTime) / 1000000000} seconds")
 }
 
-fun getJson(client: HttpClient, uri: String): JsonObject {
-    val request = HttpRequest
-        .newBuilder(URI.create(uri))
-        .header("accept", "application.json")
-        .header("Authorization",
-            "OAuth oauth_consumer_key=\"${DISCOGS_CONSUMER_KEY}\"," +
-                    "oauth_token=\"${DISCOGS_MY_ACCESS_TOKEN}\"," +
-                    "oauth_signature_method=\"HMAC-SHA1\"," +
-                    "oauth_version=\"1.0\"")
-        .build()
-    val response = client.send(request, HttpResponse.BodyHandlers.ofString())
-    val responseStream: InputStream = response.body().byteInputStream()
 
-    return Parser.default().parse(responseStream) as JsonObject
-}
-
-fun getNextPageJson(json: JsonObject, list: ArrayList<JsonObject>): ArrayList<JsonObject> {
-    println("Adding a json object...")
-    list.add(json)
-    val nextPage = json.lookup<String?>(
-        "pagination.urls.next"
-    )
-
-    // keep going if there are more pages
-    nextPage.value[0]?.let {
-        getNextPageJson(getJson(client, it), list)
-    }
-
-    return list
-}
 
